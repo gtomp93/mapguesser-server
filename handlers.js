@@ -138,7 +138,7 @@ const getTopPlayers = async (req, res) => {
             score: 1,
             lastName: 1,
             picture: 1,
-            _id: 0,
+            _id: 1,
           },
         }
       )
