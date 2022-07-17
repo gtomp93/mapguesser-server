@@ -316,7 +316,7 @@ const submitGuess = async (req, res) => {
       center,
       thirdPoint,
       player,
-      midPoint,
+      midpoint,
     } = req.body;
 
     // console.log(req.body);
@@ -334,7 +334,7 @@ const submitGuess = async (req, res) => {
               distance,
               guess,
               thirdPoint,
-              midPoint,
+              midpoint,
             },
           },
           $set: { guessed: true, time: Date.now() },
@@ -353,7 +353,7 @@ const submitGuess = async (req, res) => {
               distance,
               guess,
               thirdPoint,
-              midPoint,
+              midpoint,
             },
           },
           $set: {
@@ -421,7 +421,6 @@ const retrieveMap = async (req, res) => {
       game.type === "multi" &&
       !game.players.some((item) => item.player === email)
     ) {
-      console.log("we in here");
       game.players.push({
         player: email,
         gameData: [],
@@ -458,16 +457,18 @@ const retrieveMap = async (req, res) => {
     let timeMode = null;
     let distance = 0;
     let thirdPoint = null;
-    let midPoint = { lat: 0, lng: 0 };
+    let midpoint = { lat: 0, lng: 0 };
     let guess = null;
     let gameProgress = 0;
     let zoom = 2;
+    let currentUserGame = null;
     let otherPlayerData = null;
 
     console.log(guessed, 1);
 
     if (game.type === "single") {
       gameProgress = game.gameData.length;
+      currentUserGame = game.gameData;
       endGame = gameProgress >= 5;
       game.gameData.forEach((round) => {
         gameScore += round.score;
@@ -480,36 +481,34 @@ const retrieveMap = async (req, res) => {
         points = game.gameData[gameProgress - 1].score;
         guess = game.gameData[gameProgress - 1].guess;
         thirdPoint = game.gameData[gameProgress - 1].thirdPoint;
-        midPoint = game.gameData[gameProgress - 1].midPoint;
+        midpoint = game.gameData[gameProgress - 1].midpoint;
       } else locationIndex = gameProgress;
     }
     if (game.type === "multi") {
-      let playerGame = game.players.find((item) => item.player === email);
-      console.log(playerGame, "playergame");
-      gameProgress = playerGame.gameData.length;
+      currentUserGame = game.players.find((item) => item.player === email);
+      console.log(currentUserGame, "currentUserGame");
+      gameProgress = currentUserGame.gameData.length;
       endGame = gameProgress >= 5;
       otherPlayerData = game.players.filter((user) => {
         return user.player !== email;
       });
 
-      playerGame.gameData.forEach((round) => {
+      currentUserGame.gameData.forEach((round) => {
         gameScore += round.score;
       });
-      if (playerGame.guessed) {
+      if (currentUserGame.guessed) {
         guessed = true;
-        console.log(guessed, 2);
-        points = playerGame.gameData[gameProgress - 1].score;
+        points = currentUserGame.gameData[gameProgress - 1].score;
         locationIndex = gameProgress - 1;
-        distance = playerGame.gameData[gameProgress - 1].distance;
-        thirdPoint = playerGame.gameData[gameProgress - 1].thirdPoint;
-        guess = playerGame.gameData[gameProgress - 1].guess;
-        midPoint = playerGame.gameData[gameProgress - 1].midPoint;
+        distance = currentUserGame.gameData[gameProgress - 1].distance;
+        thirdPoint = currentUserGame.gameData[gameProgress - 1].thirdPoint;
+        guess = currentUserGame.gameData[gameProgress - 1].guess;
+        midpoint = currentUserGame.gameData[gameProgress - 1].midpoint;
       } else locationIndex = gameProgress;
     }
 
     if (guessed) {
       if (distance > 3000000) {
-        console.log("heeeere");
         zoom = 1;
       } else if (distance > 1000000 && (guess.lat > 58 || guess.lat < -58)) {
         zoom = 2;
@@ -545,11 +544,12 @@ const retrieveMap = async (req, res) => {
       guessed,
       thirdPoint,
       guess,
-      midPoint,
+      midpoint,
       playerMode: game.type,
       locations: game.locations,
       zoom,
       otherPlayerData,
+      currentUserGame,
     });
 
     res.status(200).json({
@@ -568,8 +568,9 @@ const retrieveMap = async (req, res) => {
         thirdPoint,
         guess,
         zoom,
-        midPoint,
+        midpoint: midpoint,
         otherPlayerData,
+        myGameData: currentUserGame.gameData ? currentUserGame.gameData : [],
       },
     });
   } catch (err) {
@@ -584,8 +585,8 @@ const retrieveMaps = async (req, res) => {
   const db = client.db("Final_Project");
 
   try {
-    const { games } = req.body;
-
+    const { games, email } = req.body;
+    console.log(email);
     await client.connect();
 
     const myGames = await db
@@ -593,7 +594,29 @@ const retrieveMaps = async (req, res) => {
       .find({ _id: { $in: games } })
       .toArray();
 
-    res.status(200).json({ status: 200, data: myGames });
+    let allGames = myGames.reduce(
+      (games, game) => {
+        if (game.type === "single") {
+          return game.gameData.length === 5
+            ? { ...games, complete: [...games.complete, game] }
+            : { ...games, active: [...games.active, game] };
+        } else {
+          console.log({ players: game.players });
+          console.log(
+            game.players.find(({ player }) => player.email === email)
+          );
+          return game.players.find(({ player }) => player === email)?.gameData
+            .length === 5
+            ? { ...games, complete: [...games.complete, game] }
+            : { ...games, active: [...games.active, game] };
+        }
+      },
+      { active: [], complete: [] }
+    );
+
+    console.log(allGames);
+
+    res.status(200).json({ status: 200, data: allGames });
   } catch (err) {
     console.log(err.stack);
   } finally {
