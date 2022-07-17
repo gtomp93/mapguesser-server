@@ -265,7 +265,14 @@ const createGame = async (req, res) => {
       timeMode,
       name,
       players: [
-        { player, icon, gameData: [], guessed: false, time: Date.now() },
+        {
+          player: player.email,
+          icon,
+          gameData: [],
+          guessed: false,
+          time: Date.now(),
+          name: player.givenName,
+        },
       ],
     };
 
@@ -410,7 +417,7 @@ const retrieveMap = async (req, res) => {
   try {
     const { _id } = req.params;
     const {
-      currentUser: { email, picture },
+      currentUser: { email, picture, givenName, lastName },
     } = req.body;
     console.log(email, picture, "player");
     await client.connect();
@@ -427,6 +434,7 @@ const retrieveMap = async (req, res) => {
         guessed: false,
         icon: picture,
         time: Date.now(),
+        name: givenName,
       });
       //player
 
@@ -443,6 +451,7 @@ const retrieveMap = async (req, res) => {
               gameData: [],
               guessed: false,
               icon: picture,
+              name: givenName,
             },
           },
         }
