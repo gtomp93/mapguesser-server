@@ -278,8 +278,9 @@ const createGame = async (req, res) => {
 
     console.log(newMultiplayerGame);
 
-    if (mode === "multi")
+    if (mode === "multi") {
       result = await db.collection("Games").insertOne(newMultiplayerGame);
+    }
 
     if (mode === "single") {
       result = await db.collection("Games").insertOne({
@@ -297,7 +298,7 @@ const createGame = async (req, res) => {
 
     await db
       .collection("Users")
-      .updateOne({ email: player }, { $push: { games: _id } });
+      .updateOne({ email: player.email }, { $push: { games: _id } });
 
     res.status(200).json({ status: 200, gameId: _id });
 
@@ -612,7 +613,7 @@ const retrieveMaps = async (req, res) => {
         } else {
           console.log({ players: game.players });
           console.log(
-            game.players.find(({ player }) => player.email === email)
+            game.players.find(({ player }) => player?.email === email)
           );
           return game.players.find(({ player }) => player === email)?.gameData
             .length === 5
