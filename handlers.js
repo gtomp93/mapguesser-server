@@ -799,7 +799,7 @@ const likeGame = async (req, res) => {
 const comment = async (req, res) => {
   const client = new MongoClient(MONGO_URI, options);
   const db = client.db("Final_Project");
-
+  console.log({ params: req.params, body: req.body });
   try {
     const { _id } = req.params;
     const { comment, commentBy, pic } = req.body;
@@ -809,8 +809,11 @@ const comment = async (req, res) => {
     await db
       .collection("Game_Modes")
       .updateOne({ _id }, { $push: { comments: { comment, commentBy, pic } } });
+    res
+      .status(200)
+      .json({ status: 200, message: "successfully added comment" });
   } catch (err) {
-    res.status(200).json({ err });
+    res.status(400).json({ err });
   } finally {
     await client.close();
   }
