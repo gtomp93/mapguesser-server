@@ -187,6 +187,7 @@ const updateUserScore = async (req, res) => {
 
   try {
     const { score, _id } = req.body;
+    console.log(req.body);
 
     await client.connect();
 
@@ -196,7 +197,7 @@ const updateUserScore = async (req, res) => {
   } catch (err) {
     console.log(err);
   } finally {
-    await client.close();
+    client.close();
   }
 };
 
@@ -478,7 +479,7 @@ const retrieveMap = async (req, res) => {
 
     if (game.type === "single") {
       gameProgress = game.gameData.length;
-      currentUserGame = game.gameData;
+      currentUserGame = game;
       endGame = gameProgress >= 5;
       game.gameData.forEach((round) => {
         gameScore += round.score;
