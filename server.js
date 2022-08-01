@@ -5,36 +5,38 @@ const PORT = process.env.PORT || 5000;
 
 const cors = require("cors");
 const {
-  addUser,
-  checkForUser,
-  getLocations,
-  updateUserScore,
   getFeaturedMaps,
-  addName,
   searchOpponent,
-  retrieveMap,
-  loadOtherPlayers,
   getTopPlayers,
-  createGame,
   getGame,
-  CreateMap,
-  AddMapToUser,
   getGames,
   likeGame,
   addToLikes,
-  removeGameFromUser,
-  deleteGame,
   comment,
-  getS3url,
-  getPlayerGames,
+  searchMaps,
+} = require("./HomepageHandlers");
+
+const {
+  getLocations,
+  updateUserScore,
+  createGame,
   submitGuess,
   nextLocation,
-  searchMaps,
-  retrieveMaps,
-} = require("./handlers");
+  retrieveMap,
+  loadOtherPlayers,
+} = require("./gamePlayHandlers");
 
-// const {getS3url} = require("./s3");
+const { checkForUser, addUser, addName } = require("./UserLoginHandlers");
 
+const {
+  AddMapToUser,
+  getS3url,
+  removeGameFromUser,
+  CreateMap,
+  deleteGame,
+} = require("./MapCreationHandlers");
+
+const { retrieveMaps, getPlayerGames } = require("./ProfileHandlers");
 // const bodyParser = require("body-parser");
 
 express()
