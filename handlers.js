@@ -597,7 +597,7 @@ const retrieveMaps = async (req, res) => {
 
   try {
     const { games, email } = req.body;
-    console.log(email);
+    console.log({ email });
     await client.connect();
 
     const myGames = await db
@@ -612,10 +612,6 @@ const retrieveMaps = async (req, res) => {
             ? { ...games, complete: [...games.complete, game] }
             : { ...games, active: [...games.active, game] };
         } else {
-          console.log({ players: game.players });
-          console.log(
-            game.players.find(({ player }) => player?.email === email)
-          );
           return game.players.find(({ player }) => player === email)?.gameData
             .length === 5
             ? { ...games, complete: [...games.complete, game] }
@@ -625,9 +621,36 @@ const retrieveMaps = async (req, res) => {
       { active: [], complete: [] }
     );
 
-    console.log(allGames);
+    const sortingFunc = (a, b) => {
+      a = !a
+        ? 0
+        : a.time
+        ? a.time
+        : a.players.find(({ player }) => player === email)?.time
+        ? a.players.find(({ player }) => player === email).time
+        : 0;
+      b = !b
+        ? 0
+        : b.time
+        ? b.time
+        : b.players.find(({ player }) => player === email)?.time
+        ? b.players.find(({ player }) => player === email).time
+        : 0;
 
-    res.status(200).json({ status: 200, data: allGames });
+      return a - b;
+    };
+
+    allGames.active.sort(sortingFunc);
+
+    allGames.complete.sort(sortingFunc);
+
+    res.status(200).json({
+      status: 200,
+      data: {
+        active: allGames.active,
+        complete: allGames.complete,
+      },
+    });
   } catch (err) {
     console.log(err.stack);
   } finally {
