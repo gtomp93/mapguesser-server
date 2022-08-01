@@ -62,8 +62,6 @@ const addUsers = async (req, res) => {
     await client.connect();
     const db = client.db("Final_Project");
     const result = await db.collection("Users").insertMany(users);
-
-    console.log(result);
   } catch (err) {
     console.log(err);
   }

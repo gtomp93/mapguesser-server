@@ -48,8 +48,6 @@ const updateUserScore = async (req, res) => {
 
   try {
     const { score, _id } = req.body;
-    console.log(req.body);
-
     await client.connect();
 
     await db.collection("Users").updateOne({ _id }, { $inc: { score: score } });
@@ -67,13 +65,10 @@ const createGame = async (req, res) => {
   const db = client.db("Final_Project");
 
   const { locations, player, mode, timeMode, icon, name } = req.body;
-  console.log(locations, mode);
   try {
     await client.connect();
     const _id = uuidv4();
     let result = null;
-
-    console.log(player);
 
     let newMultiplayerGame = {
       _id,
@@ -92,8 +87,6 @@ const createGame = async (req, res) => {
         },
       ],
     };
-
-    console.log(newMultiplayerGame);
 
     if (mode === "multi") {
       result = await db.collection("Games").insertOne(newMultiplayerGame);
@@ -144,8 +137,6 @@ const submitGuess = async (req, res) => {
       midpoint,
     } = req.body;
 
-    // console.log(req.body);
-
     let result = null;
     await client.connect();
 
@@ -168,7 +159,6 @@ const submitGuess = async (req, res) => {
     }
 
     if (mode === "multi") {
-      console.log("aightt");
       result = await db.collection("Games").updateOne(
         { _id, "players.player": player },
         {
@@ -188,7 +178,6 @@ const submitGuess = async (req, res) => {
         }
       );
     }
-    // console.log(result);
     res.status(200).json({ status: 200 });
   } catch (err) {
     console.log(err.stack);
@@ -203,7 +192,6 @@ const nextLocation = async (req, res) => {
 
   try {
     const { mode, _id, player } = req.body;
-    // console.log(req.body);
     await client.connect();
     if (mode === "single") {
       await db
@@ -395,13 +383,11 @@ const loadOtherPlayers = async (req, res) => {
     await client.connect();
 
     let gameInfo = await db.collection("Games").findOne({ _id });
-    console.log(gameInfo);
     let data = gameInfo
       ? gameInfo.players.filter((user) => {
           return user.player !== player;
         })
       : null;
-    console.log(data, "data");
     if (!data.length) {
       data = null;
     }

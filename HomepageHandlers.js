@@ -35,8 +35,6 @@ const getTopPlayers = async (req, res) => {
       .limit(17)
       .toArray();
 
-    // console.log(players);
-
     res.status(200).json({ data: players, status: 200 });
   } catch (err) {
     res.status(404).json({ status: 404, message: "not found" });
@@ -54,12 +52,8 @@ const getGame = async (req, res) => {
     const { _id } = req.params;
 
     await client.connect();
-    console.log(_id);
-    // const Game_Modes = db.collection;
 
     const result = await db.collection("Game_Modes").findOne({ _id });
-
-    // const result = Game_Modes.aggregate([{$unwind: "$locations"}]);
 
     res.status(200).json({ status: 200, result });
     client.close();
@@ -77,7 +71,6 @@ const getGames = async (req, res) => {
   try {
     const { page } = req.query;
     let indexStart = (Number(page) - 1) * 20;
-    console.log(req.query);
     await client.connect();
     let result = null;
     if (page > 1) {
@@ -88,7 +81,6 @@ const getGames = async (req, res) => {
         .limit(20)
         .toArray();
     } else {
-      console.log("we in here");
       result = await db.collection("Game_Modes").find().limit(20).toArray();
     }
 
@@ -117,7 +109,6 @@ const getFeaturedMaps = async (req, res) => {
       .collection("Game_Modes")
       .find({ _id: { $in: maps } })
       .toArray();
-    console.log("mappy", result);
 
     res.status(200).json({ status: 200, result });
   } catch (err) {
@@ -159,7 +150,6 @@ const likeGame = async (req, res) => {
 const comment = async (req, res) => {
   const client = new MongoClient(MONGO_URI, options);
   const db = client.db("Final_Project");
-  console.log({ params: req.params, body: req.body });
   try {
     const { _id } = req.params;
     const { comment, commentBy, pic } = req.body;
@@ -219,8 +209,6 @@ const searchMaps = async (req, res) => {
     await client.connect();
 
     const { searchQuery } = req.query;
-    console.log(req.query);
-    console.log({ searchQuery });
 
     await db
       .collection("Game_Modes")
@@ -230,8 +218,6 @@ const searchMaps = async (req, res) => {
       .collection("Game_Modes")
       .find({ $text: { $search: searchQuery, $caseSensitive: false } })
       .toArray();
-
-    console.log({ games });
 
     if (games) {
       res.status(200).json({ status: 200, data: games });
@@ -250,18 +236,11 @@ const searchOpponent = (req, res) => {};
 module.exports = {
   getTopPlayers,
   getFeaturedMaps,
-  retrieveMaps,
   searchOpponent,
-  removeGameFromUser,
-  deleteGame,
-  CreateMap,
   getGame,
   getGames,
-  AddMapToUser,
   likeGame,
   comment,
   addToLikes,
-  getPlayerGames,
-  getS3url,
   searchMaps,
 };
