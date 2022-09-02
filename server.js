@@ -37,13 +37,11 @@ const {
 } = require("./MapCreationHandlers");
 
 const { retrieveMaps, getPlayerGames } = require("./ProfileHandlers");
-// const bodyParser = require("body-parser");
 
 express()
   .use(morgan("tiny"))
   .use(express.json())
   .use(express.static("public"))
-  // .use(bodyParser.json())
   .use(cors())
 
   .post("/api/users", addUser)

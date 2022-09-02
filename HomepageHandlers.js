@@ -97,9 +97,7 @@ const getFeaturedMaps = async (req, res) => {
   const db = client.db("Final_Project");
 
   const maps = [
-    // "337a4661-dab0-46d9-bffc-7fe00c48223f",
-    "ffd65286-96e8-4c85-9b53-8544aa1b52e3",
-    // "d65052e8-7875-4b47-8ff2-64f563db76f7",
+    "4af008af-ea08-4e40-ac70-5c7b54a62391",
     "21e2c943-aad3-4d77-a5eb-65a7a6742d96",
   ];
 
