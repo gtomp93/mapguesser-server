@@ -78,12 +78,12 @@ const createGame = async (req, res) => {
       name,
       players: [
         {
-          player: player.email,
+          player: player?.email,
           icon,
           gameData: [],
           guessed: false,
           time: Date.now(),
-          name: player.givenName,
+          name: player?.givenName,
         },
       ],
     };
@@ -105,10 +105,11 @@ const createGame = async (req, res) => {
         time: Date.now(),
       });
     }
-
-    await db
-      .collection("Users")
-      .updateOne({ email: player.email }, { $push: { games: _id } });
+    if (player) {
+      await db
+        .collection("Users")
+        .updateOne({ email: player.email }, { $push: { games: _id } });
+    }
 
     res.status(200).json({ status: 200, gameId: _id });
 
@@ -222,9 +223,11 @@ const retrieveMap = async (req, res) => {
 
   try {
     const { _id } = req.params;
-    const {
-      currentUser: { email, picture, givenName, lastName },
-    } = req.body;
+    const { currentUser } = req.body;
+    const { email, picture, givenName, lastName } = currentUser
+      ? currentUser
+      : { email: null, picture: null, givenName: null, lastName: null };
+
     await client.connect();
 
     let game = await db.collection("Games").findOne({ _id });
